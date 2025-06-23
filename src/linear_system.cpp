@@ -119,3 +119,35 @@ std::vector<double> LinearSystem::solveLU()
     luDecompose(L, U, perm);
     return luSolve(L, U, perm);
 }
+
+std::vector<double> LinearSystem::solveJacobi(int maxIter, double tol)
+{
+    size_t n = A.n;
+    std::vector<double> x(n, 0.0);
+    std::vector<double> x_new(n, 0.0);
+
+    for (int iter = 0; iter < maxIter; iter++)
+    {
+        for (size_t i = 0; i < n; i++)
+        {
+            double sigma = 0.0;
+            for (size_t j = 0; j < n; j++)
+            {
+                if (j != i)
+                    sigma += A(i, j) * x[j];
+            }
+            if (std::abs(A(i, i) < 1e-12))
+                throw std::runtime_error("Zero diagonal element in Jacobi method");
+            x_new[i] = (b[i] - sigma) / A(i, i);
+        }
+
+        double err = 0.0;
+        for (size_t i = 0; i < n; i++)
+            err += std::abs(x_new[i] - x[i]);
+        if (err < tol)
+            return x_new;
+
+        x = x_new;
+    }
+    return x_new;
+}
