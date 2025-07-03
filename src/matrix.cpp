@@ -24,9 +24,11 @@ void Matrix::print() const
 {
     for (size_t i = 0; i < n; i++)
     {
+        std::cout << "\t";
         size_t j = 0;
         for (j; j < m - 1; j++)
             std::cout << matrix[i][j] << "x" << j + 1 << " ";
         std::cout << "= " << matrix[i][j] << "\n";
     }
+    std::cout << "\n";
 }
