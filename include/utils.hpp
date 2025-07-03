@@ -5,11 +5,11 @@
 #include <utility>
 #include <string>
 
-template <typename Func, typename Arg>
-double measureTime(Func func, Arg &&arg)
+template <typename Func>
+double measureTime(Func func)
 {
     auto start = std::chrono::high_resolution_clock::now();
-    func(std::forward<Arg>(arg));
+    func();
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
     return duration.count() / 1000.0;
