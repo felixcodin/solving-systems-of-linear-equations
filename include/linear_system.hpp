@@ -2,6 +2,7 @@
 #define LINEAR_SYSTEM_HPP
 
 #include "matrix.hpp"
+#include "exceptions.hpp"
 #include <vector>
 
 class LinearSystem
