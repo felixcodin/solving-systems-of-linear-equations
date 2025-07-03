@@ -42,8 +42,62 @@ void printSolution(const std::string &methodName, std::function<std::vector<doub
 
 int main()
 {
-    generateMatrixToFile("inputMatrix.txt", 3);
-    generateVectorToFile("inputVector.txt", 3);
+    cout << "======Choose one======" << endl;
+    int key;
+    cout << "1 = Random systems of linear equations." << endl;
+    cout << "2 = Enter systems of linear equations." << endl;
+    cin >> key;
+    
+    size_t sz;
+    cout << "Enter simul equation number of unknowns (> 0): ";
+    cin >> sz;
+    if (sz <= 0)
+    throw runtime_error("Number of unknown <= 0");
+    
+    
+    vector<vector<double>> tempMatrix(sz, vector<double>(sz + 1, 0.0));
+    switch(key)
+    {
+    case 1:
+        cout << "Enter (n, m) of value to get generate: ";
+        int minV, maxV;
+        cin >> minV >> maxV;
+        generateMatrixToFile("inputMatrix.txt", sz, minV, maxV);
+        generateVectorToFile("inputVector.txt", sz, minV, maxV);
+        break;
+    
+    case 2:
+        for (size_t i = 0; i < sz; i++)
+        {
+            size_t j = 0;
+            for (j; j < sz + 1; j++)
+                cin >> tempMatrix[i][j];
+        }
+        
+        {
+            ofstream outMatrix("inputMatrix.txt");
+            if (!outMatrix) throw runtime_error("Can't open inputMatrix.txt");
+            ofstream outVector("inputVector.txt");
+            if (!outVector) throw runtime_error("Can't open inputVector.txt");
+
+            outMatrix << sz << endl; 
+            outVector << sz << endl;
+            for (size_t i = 0; i < sz; i++)
+            {
+                size_t j = 0;
+                for (j; j < sz; j++)
+                    outMatrix << tempMatrix[i][j] << " ";
+                outMatrix << endl;
+                outVector << tempMatrix[i][j] << " ";
+            }
+            outVector << endl;
+        }
+        break;
+
+    default:
+        cout << "Invalid Option." << endl;
+        return 1;
+    }
 
     Matrix A = Matrix::loadFromFile("inputMatrix.txt");
 
@@ -68,6 +122,7 @@ int main()
             extendedMatrix(i, j) = A(i, j);
         extendedMatrix(i, n) = b[i];
     }
+    cout << endl;
     extendedMatrix.print();
 
     printSolution("Gaussian Elimination", [&]() { return system.solveGaussian(); });
