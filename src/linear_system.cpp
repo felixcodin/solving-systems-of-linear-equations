@@ -151,3 +151,46 @@ std::vector<double> LinearSystem::solveJacobi(int maxIter, double tol)
     }
     return x_new;
 }
+
+std::vector<double> LinearSystem::solveGaussJordan()
+{
+    size_t n = A.n;
+    Matrix M = A;
+    std::vector<double> rhs = b;
+
+    for (size_t i = 0; i < n; i++)
+    {
+        //Tim pivot
+        size_t maxRow = i;
+        for (size_t k = i + 1; k < n; k++)
+        {
+            if (std::abs(M(k, i)) > std::abs(M(maxRow, i)))
+                maxRow = k;
+        }
+
+        if (std::abs(M(maxRow, i)) < 1e-12)
+            throw std::runtime_error("Matrix is singular or nearly singular");
+
+        //Hoan doi dong
+        std::swap(M.matrix[i], M.matrix[maxRow]);
+        std::swap(rhs[i], rhs[maxRow]);
+
+        //Chuan hoa dong i
+        double pivot = M(i, i);
+        for (size_t j = 0; j < n; j++)
+            M(i, j) /= pivot;
+        rhs[i] /= pivot;
+
+        //Khu cac dong khac
+        for (size_t k = 0; k < n; k++)
+        {
+            if (k == i) continue;
+            double factor = M(k, i);
+            for (size_t j = 0; j < n; j++)
+                M(k, j) -= factor * M(i, j);
+            rhs[k] -= factor * rhs[i];
+        }
+    }
+
+    return rhs; 
+}
