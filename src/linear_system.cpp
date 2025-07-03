@@ -1,9 +1,65 @@
 #include "linear_system.hpp"
 #include <cmath>
-#include <stdexcept>
 #include <algorithm>
 
 LinearSystem::LinearSystem(const Matrix &A, const std::vector<double> &b) : A(A), b(b) {}
+
+inline std::pair<size_t, size_t> computeRanks(const Matrix &A, const std::vector<double> &b)
+{
+    size_t n = A.n;
+    Matrix R(n, n + 1);
+
+    for (size_t i = 0; i < n; i++)
+    {
+        for (size_t j = 0; j < n; j++)
+            R(i, j) = A(i, j);
+        R(i, n) = b[i];
+    }
+    
+    size_t row = 0;
+    for (size_t col = 0; col < n && row < n; col++)
+    {
+        size_t sel = row;
+        for (size_t i = row; i < n; i++)
+            if (std::abs(R(i, col)) > std::abs(R(sel, col)))
+                sel = i;
+        
+        if (std::abs(R(sel, col)) < 1e-12)
+            continue;
+        
+        std::swap(R.matrix[row], R.matrix[sel]);
+
+        double pivot = R(row, col);
+        for (size_t j = col; j < n; j++)
+            R(row, j) /= pivot;
+        
+        for (size_t i = 0; i < n; i++)
+        {
+            if (i == row) continue;
+            double f = R(i, col);
+            for (size_t j = col; j <= n; j++)
+                R(i, j) -= f*R(row, j);
+        }
+    }
+
+    size_t rankA = 0, rankAb = 0;
+    for (size_t i = 0; i < n; i++)
+    {
+        bool nonZeroA = false;
+        for (size_t j = 0; j < n; j++)
+            if (std::abs(R(i, j)) > 1e-12)
+            {
+                nonZeroA = true;
+                break;
+            }
+        
+        bool nonZeroAb = nonZeroA || (std::abs(R(i, n)) > 1e-12);
+        if (nonZeroA) rankA++;
+        if (nonZeroAb) rankAb++;
+    }
+
+    return {rankA, rankAb};
+}
 
 std::vector<double> LinearSystem::solveGaussian(bool partialPivot)
 {
@@ -29,7 +85,11 @@ std::vector<double> LinearSystem::solveGaussian(bool partialPivot)
         }
 
         if (std::abs(M(k, k)) < 1e-12)
-            throw std::runtime_error("Matrix is singular or nearly singular");
+        {
+            auto [rankA, rankAb] = computeRanks(A, b);
+            if (rankAb > rankA) throw InconsistentSystem();
+            if (rankA < A.n) throw InfiniteSolutions();
+        }
 
         for (size_t i = k + 1; i < n; i++)
         {
@@ -80,7 +140,11 @@ void LinearSystem::luDecompose(Matrix &L, Matrix &U, std::vector<int> &perm)
             for (size_t s = 0; s < k; s++)
                 sum += L(i, s) * U(s, k);
             if (std::abs(U(k, k)) < 1e-12)
-                throw std::runtime_error("Matrix is singular or nearly singular");
+            {
+                auto [rankA, rankAb] = computeRanks(A, b);
+                if (rankAb > rankA) throw InconsistentSystem();
+                if (rankA < A.n) throw InfiniteSolutions();
+            }
             L(i, k) = (M(i, k) - sum) / U(k, k);
         }
     }
@@ -106,7 +170,11 @@ std::vector<double> LinearSystem::luSolve(const Matrix &L, const Matrix &U, cons
         for (size_t j = i + 1; j < n; j++)
             x[i] -= U(i, j) * x[j];
         if (std::abs(U(i, i)) < 1e-12)
-            throw std::runtime_error("Matrix is singular or nearly singular");
+        {
+            auto [rankA, rankAb] = computeRanks(A, b);
+            if (rankAb > rankA) throw InconsistentSystem();
+            if (rankA < A.n) throw InfiniteSolutions();
+        }
         x[i] /= U(i, i);
     }
     return x;
@@ -137,7 +205,11 @@ std::vector<double> LinearSystem::solveJacobi(int maxIter, double tol)
                     sigma += A(i, j) * x[j];
             }
             if (std::abs(A(i, i)) < 1e-12)
-                throw std::runtime_error("Zero diagonal element in Jacobi method");
+            {
+                auto [rankA, rankAb] = computeRanks(A, b);
+                if (rankAb > rankA) throw InconsistentSystem();
+                if (rankA < A.n) throw InfiniteSolutions();
+            }
             x_new[i] = (b[i] - sigma) / A(i, i);
         }
 
@@ -149,7 +221,7 @@ std::vector<double> LinearSystem::solveJacobi(int maxIter, double tol)
 
         x = x_new;
     }
-    return x_new;
+    throw std::runtime_error("Jacobi method did not converge after " + std::to_string(maxIter) + " iterations");
 }
 
 std::vector<double> LinearSystem::solveGaussJordan()
@@ -160,7 +232,6 @@ std::vector<double> LinearSystem::solveGaussJordan()
 
     for (size_t i = 0; i < n; i++)
     {
-        //Tim pivot
         size_t maxRow = i;
         for (size_t k = i + 1; k < n; k++)
         {
@@ -169,19 +240,20 @@ std::vector<double> LinearSystem::solveGaussJordan()
         }
 
         if (std::abs(M(maxRow, i)) < 1e-12)
-            throw std::runtime_error("Matrix is singular or nearly singular");
+        {
+            auto [rankA, rankAb] = computeRanks(A, b);
+            if (rankAb > rankA) throw InconsistentSystem();
+            if (rankA < A.n) throw InfiniteSolutions();
+        }
 
-        //Hoan doi dong
         std::swap(M.matrix[i], M.matrix[maxRow]);
         std::swap(rhs[i], rhs[maxRow]);
 
-        //Chuan hoa dong i
         double pivot = M(i, i);
         for (size_t j = 0; j < n; j++)
             M(i, j) /= pivot;
         rhs[i] /= pivot;
 
-        //Khu cac dong khac
         for (size_t k = 0; k < n; k++)
         {
             if (k == i) continue;
