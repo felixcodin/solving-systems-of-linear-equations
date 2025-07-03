@@ -41,12 +41,12 @@ std::vector<double> LinearSystem::solveGaussian(bool partialPivot)
     }
 
     std::vector<double> x(n);
-    for (int i = n - 1; i >= 0; i--)
+    for (size_t idx = n; idx-- > 0;)
     {
-        x[i] = rhs[i];
-        for (size_t j = i + 1; j < n; j++)
-            x[i] -= M(i, j) * x[j];
-        x[i] /= M(i, i);
+        x[idx] = rhs[idx];
+        for (size_t j = idx + 1; j < n; j++)
+            x[idx] -= M(idx, j) * x[j];
+        x[idx] /= M(idx, idx);
     }
     return x;
 }
@@ -100,7 +100,7 @@ std::vector<double> LinearSystem::luSolve(const Matrix &L, const Matrix &U, cons
             y[i] -= L(i, j) * y[j];
     }
 
-    for (int i = n - 1; i >= 0; i--)
+    for (size_t i = n; i-- > 0;)
     {
         x[i] = y[i];
         for (size_t j = i + 1; j < n; j++)
@@ -136,7 +136,7 @@ std::vector<double> LinearSystem::solveJacobi(int maxIter, double tol)
                 if (j != i)
                     sigma += A(i, j) * x[j];
             }
-            if (std::abs(A(i, i) < 1e-12))
+            if (std::abs(A(i, i)) < 1e-12)
                 throw std::runtime_error("Zero diagonal element in Jacobi method");
             x_new[i] = (b[i] - sigma) / A(i, i);
         }
