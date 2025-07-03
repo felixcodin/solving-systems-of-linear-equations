@@ -13,8 +13,8 @@ Matrix Matrix::loadFromFile(const std::string &filename)
     size_t sz;
     in >> sz;
     Matrix M(sz);
-    for (int i = 0; i < sz; i++)
-        for (int j = 0; j < sz; j++)
+    for (size_t i = 0; i < sz; i++)
+        for (size_t j = 0; j < sz; j++)
             in >> M(i, j);
     return M;
 }
