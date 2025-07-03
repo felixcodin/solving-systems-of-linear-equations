@@ -1,6 +1,6 @@
 # ninja log v6
-35	532	7732781655245780	CMakeFiles/Solving_Systems_Of_Linear_Equations.dir/src/matrix.cpp.obj	96b1768624cbdbd4
-21	759	7732778286635725	CMakeFiles/Solving_Systems_Of_Linear_Equations.dir/main.cpp.obj	336ba67673aa8f23
+47	532	7732840094504678	CMakeFiles/Solving_Systems_Of_Linear_Equations.dir/src/matrix.cpp.obj	96b1768624cbdbd4
+35	872	7732840627654250	CMakeFiles/Solving_Systems_Of_Linear_Equations.dir/main.cpp.obj	336ba67673aa8f23
 56	869	7732771506193219	CMakeFiles/Solving_Systems_Of_Linear_Equations.dir/src/utils.cpp.obj	db9e1a83ad5b97e3
 33	858	7732775372645859	CMakeFiles/Solving_Systems_Of_Linear_Equations.dir/src/linear_system.cpp.obj	16b67d6de84380d3
-533	636	7732781660215808	Solving_Systems_Of_Linear_Equations.exe	a4e6ad46f0e47d0
+872	988	7732840636021783	Solving_Systems_Of_Linear_Equations.exe	a4e6ad46f0e47d0
