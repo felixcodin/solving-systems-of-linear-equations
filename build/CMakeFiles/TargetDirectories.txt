@@ -1,2 +1,3 @@
-C:/Users/Nguyen Duc Lam/solving-systems-of-linear-equations/build/CMakeFiles/edit_cache.dir
-C:/Users/Nguyen Duc Lam/solving-systems-of-linear-equations/build/CMakeFiles/rebuild_cache.dir
+D:/Solving_Systems_Of_Linear_Equations/build/CMakeFiles/Solving_Systems_Of_Linear_Equations.dir
+D:/Solving_Systems_Of_Linear_Equations/build/CMakeFiles/edit_cache.dir
+D:/Solving_Systems_Of_Linear_Equations/build/CMakeFiles/rebuild_cache.dir

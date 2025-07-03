@@ -1,0 +1,6 @@
+# ninja log v6
+22	562	7732648141964453	CMakeFiles/Solving_Systems_Of_Linear_Equations.dir/src/matrix.cpp.obj	96b1768624cbdbd4
+31	480	7732660371594143	CMakeFiles/Solving_Systems_Of_Linear_Equations.dir/main.cpp.obj	336ba67673aa8f23
+26	602	7732648142004462	CMakeFiles/Solving_Systems_Of_Linear_Equations.dir/src/utils.cpp.obj	db9e1a83ad5b97e3
+21	763	7732662369723282	CMakeFiles/Solving_Systems_Of_Linear_Equations.dir/src/linear_system.cpp.obj	16b67d6de84380d3
+763	859	7732662377140735	Solving_Systems_Of_Linear_Equations.exe	a4e6ad46f0e47d0
