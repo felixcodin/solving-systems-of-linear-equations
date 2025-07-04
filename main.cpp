@@ -129,6 +129,7 @@ int main()
     printSolution("LU Decomposition", [&]() { return system.solveLU(); });
     printSolution("Gauss-Jordan", [&]() { return system.solveGaussJordan(); });
     printSolution("Jacobi", [&]() { return system.solveJacobi(); });
+    printSolution("Gauss-Seidel", [&]() { return system.solveGaussSeidel(); });
 
     return 0;
 }
