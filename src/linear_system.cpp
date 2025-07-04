@@ -51,6 +51,50 @@ std::vector<double> LinearSystem::solveGaussian(bool partialPivot)
     return x;
 }
 
+std::vector<double> LinearSystem::solveGaussJordan()
+{
+    size_t n = A.n;
+    Matrix M = A;
+    std::vector<double> rhs = b;
+
+    for (size_t i = 0; i < n; i++)
+    {
+        //Tim pivot
+        size_t maxRow = i;
+        for (size_t k = i + 1; k < n; k++)
+        {
+            if (std::abs(M(k, i)) > std::abs(M(maxRow, i)))
+                maxRow = k;
+        }
+
+        if (std::abs(M(maxRow, i)) < 1e-12)
+            throw std::runtime_error("Matrix is singular or nearly singular");
+
+        //Hoan doi dong
+        std::swap(M.matrix[i], M.matrix[maxRow]);
+        std::swap(rhs[i], rhs[maxRow]);
+
+        //Chuan hoa dong i
+        double pivot = M(i, i);
+        for (size_t j = 0; j < n; j++)
+            M(i, j) /= pivot;
+        rhs[i] /= pivot;
+
+        //Khu cac dong khac
+        for (size_t k = 0; k < n; k++)
+        {
+            if (k == i) continue;
+            double factor = M(k, i);
+            for (size_t j = 0; j < n; j++)
+                M(k, j) -= factor * M(i, j);
+            rhs[k] -= factor * rhs[i];
+        }
+    }
+
+    return rhs; 
+}
+
+
 void LinearSystem::luDecompose(Matrix &L, Matrix &U, std::vector<int> &perm)
 {
     size_t n = A.n;
@@ -152,45 +196,46 @@ std::vector<double> LinearSystem::solveJacobi(int maxIter, double tol)
     return x_new;
 }
 
-std::vector<double> LinearSystem::solveGaussJordan()
+std::vector<double> LinearSystem::solveGaussSeidel(int maxIter, double tol)
 {
     size_t n = A.n;
-    Matrix M = A;
-    std::vector<double> rhs = b;
+    std::vector<double> x(n, 0.0); // khoi tao nghiem x ban dau = 0
 
-    for (size_t i = 0; i < n; i++)
+    for (int iter = 0; iter < maxIter; ++iter)
     {
-        //Tim pivot
-        size_t maxRow = i;
-        for (size_t k = i + 1; k < n; k++)
+        std::vector<double> x_old = x; // luu lai nghiem cu de tinh sai so
+
+        for (size_t i = 0; i < n; ++i)
         {
-            if (std::abs(M(k, i)) > std::abs(M(maxRow, i)))
-                maxRow = k;
+            double sum = 0.0;
+
+            // tinh tong cac he so khac A(i, i)
+            for (size_t j = 0; j < n; ++j)
+            {
+                if (j != i)
+                    sum += A(i, j) * x[j]; // dung x moi nhat neu co
+            }
+
+            // kiem tra he so duong cheo khac 0
+            if (std::abs(A(i, i)) < 1e-12)
+                throw std::runtime_error("Gauss-Seidel failed: zero diagonal element at row " + std::to_string(i));
+
+            // cap nhat gia tri moi cua x[i]
+            x[i] = (b[i] - sum) / A(i, i);
         }
 
-        if (std::abs(M(maxRow, i)) < 1e-12)
-            throw std::runtime_error("Matrix is singular or nearly singular");
+        // tinh tong sai so tuyet doi giua x moi va x cu
+        double error = 0.0;
+        for (size_t i = 0; i < n; ++i)
+            error += std::abs(x[i] - x_old[i]);
 
-        //Hoan doi dong
-        std::swap(M.matrix[i], M.matrix[maxRow]);
-        std::swap(rhs[i], rhs[maxRow]);
-
-        //Chuan hoa dong i
-        double pivot = M(i, i);
-        for (size_t j = 0; j < n; j++)
-            M(i, j) /= pivot;
-        rhs[i] /= pivot;
-
-        //Khu cac dong khac
-        for (size_t k = 0; k < n; k++)
+        // neu sai so nho hon nguong tol thi dung
+        if (error < tol)
         {
-            if (k == i) continue;
-            double factor = M(k, i);
-            for (size_t j = 0; j < n; j++)
-                M(k, j) -= factor * M(i, j);
-            rhs[k] -= factor * rhs[i];
+            return x;
         }
     }
 
-    return rhs; 
+    // sau maxIter ma chua hoi tu thi nem loi
+    throw std::runtime_error("Gauss-Seidel did not converge after " + std::to_string(maxIter) + " iterations.");
 }
