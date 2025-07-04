@@ -266,3 +266,45 @@ std::vector<double> LinearSystem::solveGaussJordan()
 
     return rhs; 
 }
+
+std::vector<double> LinearSystem::solveGaussSeidel(int maxIter, double tol)
+{
+    size_t n = A.n;
+    std::vector<double> x(n, 0.0);
+
+    for (int iter = 0; iter < maxIter; ++iter)
+    {
+        std::vector<double> x_old = x;
+
+        for (size_t i = 0; i < n; ++i)
+        {
+            double sum = 0.0;
+
+            for (size_t j = 0; j < n; ++j)
+            {
+                if (j != i)
+                    sum += A(i, j) * x[j];
+            }
+
+            if (std::abs(A(i, i)) < 1e-12)
+            {
+                auto [rankA, rankAb] = computeRanks(A, b);
+                if (rankAb > rankA) throw InconsistentSystem();
+                if (rankA < A.n) throw InfiniteSolutions();
+            }
+
+            x[i] = (b[i] - sum) / A(i, i);
+        }
+
+        double error = 0.0;
+        for (size_t i = 0; i < n; ++i)
+            error += std::abs(x[i] - x_old[i]);
+
+        if (error < tol)
+        {
+            return x;
+        }
+    }
+
+    throw std::runtime_error("Gauss-Seidel did not converge after " + std::to_string(maxIter) + " iterations.");
+}
